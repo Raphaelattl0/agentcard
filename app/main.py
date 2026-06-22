@@ -26,6 +26,7 @@ from app.models import (
 from app.converter import openapi_to_agent_card, manual_skills_to_agent_card
 from app.signing import generate_signing_key, sign_agent_card, public_key_jwk, private_key_to_pem
 from app.executor import execute_skill
+from app.mcp import handle_mcp
 from app import storage
 
 app = FastAPI(title="AgentCard.dev runtime")
@@ -115,6 +116,7 @@ def provision_tenant(req: ProvisionRequest):
         "status": "provisioned",
         "agent_card_url": f"{agent_url}/.well-known/agent-card.json",
         "rpc_url": f"{agent_url}/rpc",
+        "mcp_url": f"{agent_url}/mcp",
         "skills": [s.id for s in card.skills],
         "public_key_jwk": public_key_jwk(priv_key),
     }
@@ -196,6 +198,27 @@ def _handle_tasks_cancel(rpc_req: JsonRpcRequest) -> JsonRpcResponse:
     task_dict["status"]["state"] = TaskState.CANCELED.value
     storage.save_task(task_id, task_dict)
     return JsonRpcResponse(id=rpc_req.id, result=task_dict)
+
+
+@app.post("/t/{tenant_slug}/mcp")
+async def mcp_endpoint(tenant_slug: str, request: Request):
+    """MCP Streamable HTTP endpoint — same engine as /rpc, MCP-shaped."""
+    tenant = _load_tenant_for_runtime(tenant_slug)
+    if not tenant:
+        raise HTTPException(404, "Unknown tenant")
+
+    body = await request.json()
+    response = await handle_mcp(
+        body,
+        card=tenant["card"],
+        operation_map=tenant["operation_map"],
+        upstream_base_url=tenant["upstream_base_url"],
+        upstream_auth_header=tenant["upstream_auth_header"],
+        on_call=lambda: storage.increment_call_count(tenant_slug),
+    )
+    if response is None:  # notification — no content
+        return JSONResponse(content=None, status_code=202)
+    return JSONResponse(content=response)
 
 
 @app.post("/waitlist")
