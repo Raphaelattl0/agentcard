@@ -112,8 +112,8 @@ def manual_skills_to_agent_card(
     for ep in endpoints:
         skill = AgentSkill(
             id=ep["id"],
-            name=ep["name"],
-            description=ep["description"],
+            name=ep.get("name") or ep["id"],
+            description=ep.get("description", ""),
             tags=ep.get("tags", []),
         )
         skills.append(skill)
