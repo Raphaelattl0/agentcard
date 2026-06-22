@@ -12,9 +12,10 @@ from __future__ import annotations
 import json
 import time
 import uuid
+from pathlib import Path
 from typing import Any
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 
@@ -30,6 +31,17 @@ from app.mcp import handle_mcp
 from app import storage
 
 app = FastAPI(title="AgentCard.dev runtime")
+
+SITE_DIR = Path(__file__).resolve().parent.parent / "site"
+
+
+@app.get("/")
+def landing():
+    """Serve the marketing landing page at the root."""
+    index = SITE_DIR / "index.html"
+    if index.exists():
+        return FileResponse(index)
+    raise HTTPException(404, "Landing page not found")
 
 app.add_middleware(
     CORSMiddleware,

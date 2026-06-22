@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AgentCard.dev — Ship a signed A2A agent in one call</title>
+<title>AgentCard.dev — Turn your API into an MCP server & A2A agent in one call</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -252,9 +252,9 @@
   </nav>
 
   <section class="hero">
-    <div class="eyebrow">A2A v1.2 · signed agent cards</div>
-    <h1>Turn your API into a signed <span class="accent">A2A agent.</span><br>One call. No infra.</h1>
-    <p class="hero-sub">Paste an OpenAPI spec or describe a few endpoints. We generate a spec-compliant, cryptographically signed Agent Card and host the running JSON-RPC server — so any orchestrator can discover and call your API today.</p>
+    <div class="eyebrow">MCP + A2A · one provision, both protocols</div>
+    <h1>Turn your API into an <span class="accent">MCP server</span> & A2A agent.<br>One call. No infra.</h1>
+    <p class="hero-sub">Paste an OpenAPI spec or describe a few endpoints. We host a live MCP server that Claude and any MCP client can use today — plus a signed, spec-compliant A2A Agent Card for agent-to-agent. Same engine, both outputs.</p>
     <div class="hero-ctas">
       <a href="#signup" class="btn btn-primary">Get your API key</a>
       <a href="#how" class="btn btn-ghost">See how it works</a>
@@ -300,8 +300,8 @@
   </section>
 
   <div class="trust-strip">
-    <span><strong>JSON-RPC 2.0</strong> + SSE transport</span>
-    <span><strong>JCS / RFC 8785</strong> canonicalization</span>
+    <span><strong>MCP</strong> Streamable HTTP</span>
+    <span><strong>A2A</strong> JSON-RPC 2.0</span>
     <span><strong>ES256</strong> signed cards</span>
     <span><strong>Multi-tenant</strong> by default</span>
   </div>
@@ -309,8 +309,8 @@
   <section id="how">
     <div class="section-head">
       <div class="section-eyebrow">How it works</div>
-      <h2>From REST API to discoverable agent</h2>
-      <p class="section-sub">No SDK to learn. No server to run. The whole pipeline is one POST request.</p>
+      <h2>From REST API to MCP server &amp; A2A agent</h2>
+      <p class="section-sub">No SDK to learn. No server to run. One POST request gives you both protocols at once.</p>
     </div>
     <div class="steps">
       <div class="step">
@@ -320,13 +320,13 @@
       </div>
       <div class="step">
         <div class="step-num">02</div>
-        <h3>We generate &amp; sign</h3>
-        <p>Each operation becomes an A2A skill with a routable description. The card is canonicalized and signed with a dedicated ES256 key.</p>
+        <h3>We generate both</h3>
+        <p>Each operation becomes an MCP tool and an A2A skill with a routable description. The Agent Card is canonicalized and signed with a dedicated ES256 key.</p>
       </div>
       <div class="step">
         <div class="step-num">03</div>
-        <h3>Agents call it today</h3>
-        <p>Your agent is live at a hosted JSON-RPC endpoint. Any A2A-compliant orchestrator can discover and invoke it immediately.</p>
+        <h3>Claude &amp; agents call it today</h3>
+        <p>Your API is live at a hosted MCP endpoint any MCP client can connect to — and an A2A JSON-RPC endpoint any orchestrator can discover. Immediately.</p>
       </div>
     </div>
   </section>
@@ -372,8 +372,8 @@
         <div class="price-amount">$0<span>/mo</span></div>
         <p class="price-desc">For testing your wrapper before going live.</p>
         <ul class="price-features">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>1 agent, 500 calls/mo</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Signed Agent Card</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>1 API, 500 calls/mo</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>MCP server + signed A2A card</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Shared infrastructure</li>
         </ul>
         <a href="#signup" class="btn btn-ghost price-cta">Start free</a>
@@ -426,6 +426,7 @@
     <div class="foot-links">
       <a href="#how">How it works</a>
       <a href="#pricing">Pricing</a>
+      <a href="https://modelcontextprotocol.io" target="_blank">MCP spec</a>
       <a href="https://a2a-protocol.org" target="_blank">A2A spec</a>
     </div>
   </footer>
