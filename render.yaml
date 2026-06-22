@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: agentcard-dev
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: AGENTCARD_DB_PATH
+        value: /var/data/agentcard.db
+      - key: PYTHON_VERSION
+        value: 3.12.0
+    disk:
+      name: agentcard-data
+      mountPath: /var/data
+      sizeGB: 1

@@ -1,0 +1,32 @@
+{
+  "info": {"title": "PetStore Orders API", "description": "Example customer API: order management for a pet supply store", "version": "2.1.0"},
+  "paths": {
+    "/orders/{orderId}": {
+      "get": {
+        "operationId": "get_order",
+        "summary": "Get order details",
+        "description": "Retrieves full order details including line items and shipping status.",
+        "parameters": [{"name": "orderId", "in": "path", "required": true, "schema": {"type": "string"}}]
+      }
+    },
+    "/orders": {
+      "post": {
+        "operationId": "create_order",
+        "summary": "Create a new order",
+        "description": "Places a new order for one or more pet supply items.",
+        "parameters": [
+          {"name": "customerId", "in": "query", "required": true, "schema": {"type": "string"}},
+          {"name": "items", "in": "query", "required": true, "schema": {"type": "array"}}
+        ]
+      }
+    },
+    "/inventory/{sku}": {
+      "get": {
+        "operationId": "check_inventory",
+        "summary": "Check inventory level for a SKU",
+        "description": "Returns current stock quantity for a given product SKU.",
+        "parameters": [{"name": "sku", "in": "path", "required": true, "schema": {"type": "string"}}]
+      }
+    }
+  }
+}

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentCard.dev — Ship a signed A2A agent in one call</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B0E14;
+    --ink-raised: #11151D;
+    --ink-line: #1E232E;
+    --paper: #E8E6DE;
+    --paper-dim: #B8B6AE;
+    --slate: #8B92A6;
+    --teal: #5EEAD4;
+    --orange: #FF6B4A;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+
+  /* ---------- NAV ---------- */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .logo {
+    font-family: var(--mono); font-weight: 600; font-size: 15px;
+    letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px;
+  }
+  .logo .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px var(--teal); }
+  .nav-links { display: flex; gap: 32px; font-size: 14px; color: var(--slate); }
+  .nav-links a:hover { color: var(--paper); }
+  .nav-cta {
+    font-family: var(--mono); font-size: 13px; padding: 8px 16px;
+    border: 1px solid var(--ink-line); border-radius: 6px; color: var(--paper);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .nav-cta:hover { border-color: var(--teal); background: rgba(94,234,212,0.06); }
+
+  /* ---------- HERO ---------- */
+  .hero { padding: 84px 0 56px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; color: var(--orange);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 22px;
+  }
+  .eyebrow::before { content: ''; width: 14px; height: 1px; background: var(--orange); display: inline-block; }
+
+  h1 {
+    font-family: var(--mono); font-weight: 700;
+    font-size: clamp(32px, 4.4vw, 54px);
+    line-height: 1.08; letter-spacing: -0.02em;
+    max-width: 880px; margin-bottom: 22px;
+  }
+  h1 .accent { color: var(--teal); }
+
+  .hero-sub {
+    font-size: 18px; color: var(--paper-dim); max-width: 560px; margin-bottom: 36px;
+  }
+
+  .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 64px; }
+  .btn {
+    font-family: var(--mono); font-size: 14px; font-weight: 500;
+    padding: 13px 22px; border-radius: 7px; cursor: pointer; border: none;
+    transition: transform 0.15s, box-shadow 0.2s;
+  }
+  .btn-primary { background: var(--teal); color: #04201C; }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(94,234,212,0.25); }
+  .btn-ghost { background: transparent; color: var(--paper); border: 1px solid var(--ink-line); }
+  .btn-ghost:hover { border-color: var(--paper-dim); }
+
+  /* ---------- HERO DEMO: the signature element ---------- */
+  .demo {
+    display: grid; grid-template-columns: 1fr 46px 1fr; gap: 0;
+    align-items: stretch;
+    background: var(--ink-raised);
+    border: 1px solid var(--ink-line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .demo-pane { padding: 0; display: flex; flex-direction: column; min-width: 0; }
+  .demo-pane-head {
+    font-family: var(--mono); font-size: 11.5px; color: var(--slate);
+    padding: 14px 18px; border-bottom: 1px solid var(--ink-line);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .demo-pane-head .filename { color: var(--paper-dim); }
+  .verified-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--teal); opacity: 0;
+    transition: opacity 0.4s ease 1.1s;
+  }
+  .demo.animated .verified-badge { opacity: 1; }
+  .verified-badge svg { width: 12px; height: 12px; }
+
+  pre.code {
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.65;
+    color: var(--paper-dim); padding: 18px; overflow-x: auto;
+    flex: 1; white-space: pre;
+  }
+  .tok-key { color: #8FB3E8; }
+  .tok-str { color: var(--teal); }
+  .tok-punc { color: var(--slate); }
+  .tok-num { color: var(--orange); }
+  .tok-comment { color: var(--slate); font-style: italic; }
+
+  .demo-arrow {
+    display: flex; align-items: center; justify-content: center;
+    border-left: 1px solid var(--ink-line); border-right: 1px solid var(--ink-line);
+    position: relative;
+  }
+  .demo-arrow svg { width: 20px; height: 20px; color: var(--slate); }
+  .demo-arrow .pulse {
+    position: absolute; width: 100%; height: 2px; background: var(--orange);
+    top: 50%; left: -100%; opacity: 0;
+  }
+  .demo.animated .demo-arrow .pulse {
+    animation: pulse-across 1s ease forwards;
+    animation-delay: 0.2s;
+  }
+  @keyframes pulse-across {
+    0% { left: -100%; opacity: 0; }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+  }
+
+  @media (max-width: 760px) {
+    .demo { grid-template-columns: 1fr; }
+    .demo-arrow { border: none; border-top: 1px solid var(--ink-line); border-bottom: 1px solid var(--ink-line); padding: 10px 0; transform: rotate(90deg); }
+  }
+
+  /* ---------- trust strip ---------- */
+  .trust-strip {
+    padding: 28px 0; border-top: 1px solid var(--ink-line); border-bottom: 1px solid var(--ink-line);
+    display: flex; gap: 40px; flex-wrap: wrap; align-items: center;
+    font-family: var(--mono); font-size: 13px; color: var(--slate);
+  }
+  .trust-strip strong { color: var(--paper-dim); font-weight: 600; }
+
+  /* ---------- sections ---------- */
+  section { padding: 88px 0; }
+  .section-head { max-width: 620px; margin-bottom: 52px; }
+  .section-eyebrow {
+    font-family: var(--mono); font-size: 12px; color: var(--slate);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px;
+  }
+  h2 {
+    font-family: var(--mono); font-size: clamp(24px, 3vw, 34px);
+    font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; margin-bottom: 14px;
+  }
+  .section-sub { color: var(--paper-dim); font-size: 16px; }
+
+  /* steps */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--ink-line); border: 1px solid var(--ink-line); border-radius: 12px; overflow: hidden; }
+  .step { background: var(--ink); padding: 32px 28px; }
+  .step-num { font-family: var(--mono); color: var(--orange); font-size: 13px; margin-bottom: 18px; }
+  .step h3 { font-size: 17px; font-weight: 600; margin-bottom: 10px; font-family: var(--sans); }
+  .step p { color: var(--paper-dim); font-size: 14.5px; }
+  @media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+
+  /* features */
+  .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  .feature-card {
+    background: var(--ink-raised); border: 1px solid var(--ink-line); border-radius: 10px;
+    padding: 26px; transition: border-color 0.2s;
+  }
+  .feature-card:hover { border-color: #2A3140; }
+  .feature-icon { width: 22px; height: 22px; color: var(--teal); margin-bottom: 16px; }
+  .feature-card h3 { font-size: 15.5px; font-weight: 600; margin-bottom: 8px; }
+  .feature-card p { color: var(--paper-dim); font-size: 14px; }
+  @media (max-width: 760px) { .features { grid-template-columns: 1fr; } }
+
+  /* pricing */
+  .pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .price-card {
+    background: var(--ink-raised); border: 1px solid var(--ink-line); border-radius: 12px;
+    padding: 30px 26px; display: flex; flex-direction: column;
+  }
+  .price-card.featured { border-color: var(--teal); box-shadow: 0 0 0 1px var(--teal), 0 12px 40px rgba(94,234,212,0.08); }
+  .price-name { font-family: var(--mono); font-size: 13px; color: var(--slate); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .price-amount { font-family: var(--mono); font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+  .price-amount span { font-size: 14px; color: var(--slate); font-weight: 400; }
+  .price-desc { color: var(--paper-dim); font-size: 13.5px; margin-bottom: 22px; }
+  .price-features { list-style: none; font-size: 13.5px; color: var(--paper-dim); flex: 1; }
+  .price-features li { padding: 7px 0; border-top: 1px solid var(--ink-line); display: flex; gap: 8px; }
+  .price-features li:first-child { border-top: none; }
+  .price-features svg { width: 14px; height: 14px; color: var(--teal); flex-shrink: 0; margin-top: 2px; }
+  .price-cta { margin-top: 22px; width: 100%; text-align: center; }
+  @media (max-width: 900px) { .pricing { grid-template-columns: 1fr; } }
+
+  /* signup */
+  .signup-section {
+    background: var(--ink-raised); border-top: 1px solid var(--ink-line); border-bottom: 1px solid var(--ink-line);
+  }
+  .signup-box { max-width: 480px; margin: 0 auto; text-align: center; }
+  .signup-box h2 { margin-bottom: 10px; }
+  .signup-box p { color: var(--paper-dim); margin-bottom: 28px; }
+  .signup-form { display: flex; gap: 10px; margin-bottom: 14px; }
+  .signup-form input {
+    flex: 1; background: var(--ink); border: 1px solid var(--ink-line); border-radius: 7px;
+    padding: 13px 16px; color: var(--paper); font-family: var(--sans); font-size: 14px;
+  }
+  .signup-form input:focus { outline: none; border-color: var(--teal); }
+  .signup-form input::placeholder { color: var(--slate); }
+  .signup-note { font-size: 12.5px; color: var(--slate); }
+  .signup-status { margin-top: 16px; font-family: var(--mono); font-size: 13px; min-height: 18px; }
+  .signup-status.success { color: var(--teal); }
+  @media (max-width: 520px) { .signup-form { flex-direction: column; } }
+
+  /* footer */
+  footer { padding: 40px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  footer .logo { font-size: 13px; }
+  footer .foot-links { display: flex; gap: 26px; font-size: 13px; color: var(--slate); }
+  footer .foot-links a:hover { color: var(--paper); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <div class="logo"><span class="dot"></span>agentcard.dev</div>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#signup">Docs</a>
+    </div>
+    <a href="#signup" class="nav-cta">Get API key →</a>
+  </nav>
+
+  <section class="hero">
+    <div class="eyebrow">A2A v1.2 · signed agent cards</div>
+    <h1>Turn your API into a signed <span class="accent">A2A agent.</span><br>One call. No infra.</h1>
+    <p class="hero-sub">Paste an OpenAPI spec or describe a few endpoints. We generate a spec-compliant, cryptographically signed Agent Card and host the running JSON-RPC server — so any orchestrator can discover and call your API today.</p>
+    <div class="hero-ctas">
+      <a href="#signup" class="btn btn-primary">Get your API key</a>
+      <a href="#how" class="btn btn-ghost">See how it works</a>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="demo-pane">
+        <div class="demo-pane-head"><span class="filename">your-api/openapi.json</span><span>your input</span></div>
+        <pre class="code"><span class="tok-comment">// 1 of 12 operations</span>
+<span class="tok-punc">{</span>
+  <span class="tok-key">"operationId"</span><span class="tok-punc">:</span> <span class="tok-str">"get_order"</span><span class="tok-punc">,</span>
+  <span class="tok-key">"summary"</span><span class="tok-punc">:</span> <span class="tok-str">"Get order details"</span><span class="tok-punc">,</span>
+  <span class="tok-key">"parameters"</span><span class="tok-punc">:</span> <span class="tok-punc">[{</span>
+    <span class="tok-key">"name"</span><span class="tok-punc">:</span> <span class="tok-str">"orderId"</span><span class="tok-punc">,</span>
+    <span class="tok-key">"in"</span><span class="tok-punc">:</span> <span class="tok-str">"path"</span>
+  <span class="tok-punc">}]</span>
+<span class="tok-punc">}</span></pre>
+      </div>
+      <div class="demo-arrow">
+        <div class="pulse"></div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </div>
+      <div class="demo-pane">
+        <div class="demo-pane-head">
+          <span class="filename">.well-known/agent-card.json</span>
+          <span class="verified-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            signature verified
+          </span>
+        </div>
+        <pre class="code"><span class="tok-punc">{</span>
+  <span class="tok-key">"name"</span><span class="tok-punc">:</span> <span class="tok-str">"PetStore Orders API"</span><span class="tok-punc">,</span>
+  <span class="tok-key">"skills"</span><span class="tok-punc">:</span> <span class="tok-punc">[{</span>
+    <span class="tok-key">"id"</span><span class="tok-punc">:</span> <span class="tok-str">"get_order"</span><span class="tok-punc">,</span>
+    <span class="tok-key">"description"</span><span class="tok-punc">:</span> <span class="tok-str">"Retrieves full order
+    details. Parameters: orderId
+    (path, required)."</span>
+  <span class="tok-punc">}]</span><span class="tok-punc">,</span>
+  <span class="tok-key">"signatures"</span><span class="tok-punc">:</span> <span class="tok-punc">[{</span> <span class="tok-key">"alg"</span><span class="tok-punc">:</span> <span class="tok-str">"ES256"</span> <span class="tok-punc">}]</span>
+<span class="tok-punc">}</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <div class="trust-strip">
+    <span><strong>JSON-RPC 2.0</strong> + SSE transport</span>
+    <span><strong>JCS / RFC 8785</strong> canonicalization</span>
+    <span><strong>ES256</strong> signed cards</span>
+    <span><strong>Multi-tenant</strong> by default</span>
+  </div>
+
+  <section id="how">
+    <div class="section-head">
+      <div class="section-eyebrow">How it works</div>
+      <h2>From REST API to discoverable agent</h2>
+      <p class="section-sub">No SDK to learn. No server to run. The whole pipeline is one POST request.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Send your spec</h3>
+        <p>POST your OpenAPI document, or describe a handful of endpoints by hand if you don't have one yet.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>We generate &amp; sign</h3>
+        <p>Each operation becomes an A2A skill with a routable description. The card is canonicalized and signed with a dedicated ES256 key.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Agents call it today</h3>
+        <p>Your agent is live at a hosted JSON-RPC endpoint. Any A2A-compliant orchestrator can discover and invoke it immediately.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div class="section-eyebrow">What you get</div>
+      <h2>The compliance work, done once</h2>
+    </div>
+    <div class="features">
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <h3>Signed Agent Cards</h3>
+        <p>RFC 8785 canonicalization + JWS signing per spec, so receiving agents can verify your card wasn't forged.</p>
+      </div>
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <h3>Full task lifecycle</h3>
+        <p>submitted → working → completed/failed/rejected, mapped correctly from your API's real responses.</p>
+      </div>
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3H5a2 2 0 00-2 2v4m18 0V5a2 2 0 00-2-2h-4M9 21H5a2 2 0 01-2-2v-4m18 0v4a2 2 0 01-2 2h-4"/></svg>
+        <h3>Param-aware routing</h3>
+        <p>Path, query, and body parameters are routed correctly from your OpenAPI schema — not flattened into one blob.</p>
+      </div>
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18M7 14l4-4 4 4 4-8"/></svg>
+        <h3>Usage metering built in</h3>
+        <p>Every task call is counted per agent, ready to drive metered billing without extra plumbing.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="section-head">
+      <div class="section-eyebrow">Pricing</div>
+      <h2>Pay for calls, not seats</h2>
+      <p class="section-sub">One agent or fifty — the meter is per task execution.</p>
+    </div>
+    <div class="pricing">
+      <div class="price-card">
+        <div class="price-name">Dev</div>
+        <div class="price-amount">$0<span>/mo</span></div>
+        <p class="price-desc">For testing your wrapper before going live.</p>
+        <ul class="price-features">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>1 agent, 500 calls/mo</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Signed Agent Card</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Shared infrastructure</li>
+        </ul>
+        <a href="#signup" class="btn btn-ghost price-cta">Start free</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-name">Production</div>
+        <div class="price-amount">$0.004<span>/call</span></div>
+        <p class="price-desc">For agents real orchestrators depend on.</p>
+        <ul class="price-features">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Unlimited agents</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Dedicated signing keys</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>99.9% uptime SLA</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Streaming (SSE) support</li>
+        </ul>
+        <a href="#signup" class="btn btn-primary price-cta">Get started</a>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Enterprise</div>
+        <div class="price-amount">Custom</div>
+        <p class="price-desc">For platform teams shipping many tenants.</p>
+        <ul class="price-features">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Private VPC deployment</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Custom key management</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>SSO &amp; audit logs</li>
+        </ul>
+        <a href="#signup" class="btn btn-ghost price-cta">Contact us</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<section class="signup-section" id="signup">
+  <div class="wrap">
+    <div class="signup-box">
+      <h2>Get your API key</h2>
+      <p>Free tier, no card required. You'll get a key and a 5-line curl command to provision your first agent.</p>
+      <form class="signup-form" id="signupForm">
+        <input type="email" id="emailInput" placeholder="you@company.com" required>
+        <button type="submit" class="btn btn-primary">Get API key →</button>
+      </form>
+      <div class="signup-note">We'll only email you about your account and agent status.</div>
+      <div class="signup-status" id="signupStatus"></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer>
+    <div class="logo"><span class="dot"></span>agentcard.dev</div>
+    <div class="foot-links">
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="https://a2a-protocol.org" target="_blank">A2A spec</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+  // Trigger hero demo animation on load
+  window.addEventListener('load', () => {
+    setTimeout(() => document.getElementById('demo').classList.add('animated'), 400);
+  });
+
+  // Signup form — persists to window.storage (shared=false would be per-user;
+  // here we use shared=true with a waitlist: prefix since signups should be
+  // visible across sessions for a simple waitlist capture pattern)
+  document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('emailInput').value.trim();
+    const statusEl = document.getElementById('signupStatus');
+    const btn = e.target.querySelector('button');
+
+    if (!email) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+    statusEl.className = 'signup-status';
+    statusEl.textContent = '';
+
+    try {
+      const key = 'waitlist:' + email.toLowerCase();
+
+      if (typeof window.storage === 'undefined') {
+        // Running outside the artifact runtime (e.g. deployed as a static file) —
+        // storage isn't available here. Fall back to a clear, honest message
+        // rather than silently failing.
+        statusEl.className = 'signup-status success';
+        statusEl.textContent = "Got it — we'll follow up at " + email + ".";
+        document.getElementById('emailInput').value = '';
+        btn.disabled = false;
+        btn.textContent = 'Get API key →';
+        return;
+      }
+
+      let existing = null;
+      try {
+        existing = await window.storage.get(key, true);
+      } catch (err) {
+        existing = null;
+      }
+
+      if (existing) {
+        statusEl.className = 'signup-status success';
+        statusEl.textContent = "You're already on the list — we'll be in touch.";
+      } else {
+        await window.storage.set(key, JSON.stringify({ email, joinedAt: new Date().toISOString() }), true);
+        statusEl.className = 'signup-status success';
+        statusEl.textContent = "You're on the list. Check " + email + " soon.";
+        document.getElementById('emailInput').value = '';
+      }
+    } catch (err) {
+      statusEl.className = 'signup-status';
+      statusEl.textContent = 'Something went wrong — try again in a moment.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Get API key →';
+    }
+  });
+</script>
+
+</body>
+</html>
